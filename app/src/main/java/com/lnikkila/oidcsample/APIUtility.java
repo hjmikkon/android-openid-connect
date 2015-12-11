@@ -57,10 +57,13 @@ public class APIUtility {
         // notification is selected, it will launch the intent for re-authorisation. You could
         // launch it automatically here if you wanted to by grabbing the intent from the bundle.
         try {
+            //AccountManagerFuture<Bundle> futureManager = accountManager.getAuthToken(account,
+            //        Authenticator.TOKEN_TYPE_ID, null, true, null, null);
             AccountManagerFuture<Bundle> futureManager = accountManager.getAuthToken(account,
-                    Authenticator.TOKEN_TYPE_ID, null, true, null, null);
+                    Authenticator.TOKEN_TYPE_ACCESS, null, true, null, null);
 
             idToken = futureManager.getResult().getString(AccountManager.KEY_AUTHTOKEN);
+            //idToken = futureManager.getResult().getString(AccountManager.KEY_AUTHTOKEN);
         } catch (Exception e) {
             throw new IOException("Could not get ID token from account.", e);
         }
