@@ -372,7 +372,8 @@ public class AuthenticatorActivity extends AccountAuthenticatorActivity {
         Map userInfo = Collections.emptyMap();
 
         try {
-            userInfo = OIDCUtils.getUserInfo(Config.userInfoUrl, response.getIdToken());
+//            userInfo = OIDCUtils.getUserInfo(Config.userInfoUrl, response.getIdToken());
+            userInfo = OIDCUtils.getUserInfo(Config.userInfoUrl, response.getAccessToken());
         } catch (IOException e) {
             Log.e(TAG, "Could not get UserInfo.");
             e.printStackTrace();
