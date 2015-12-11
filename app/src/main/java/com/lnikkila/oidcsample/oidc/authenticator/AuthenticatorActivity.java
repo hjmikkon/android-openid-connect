@@ -8,10 +8,12 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
+import android.net.http.SslError;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
+import android.webkit.SslErrorHandler;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
@@ -78,12 +80,17 @@ public class AuthenticatorActivity extends AccountAuthenticatorActivity {
         // Initialise the WebView
         WebView webView = (WebView) findViewById(R.id.WebView);
 
-        // TODO: Enable this if your authorisation page requires JavaScript
-        // webView.getSettings().setJavaScriptEnabled(true);
+        webView.getSettings().setJavaScriptEnabled(true);
 
         webView.loadUrl(authUrl);
 
         webView.setWebViewClient(new WebViewClient() {
+
+            @Override
+            public void onReceivedSslError(WebView view, SslErrorHandler handler, SslError error) {
+                //TODO: accept all the server certificates
+                handler.proceed();
+            }
             @Override
             public void onPageStarted(WebView view, String urlString, Bitmap favicon) {
                 super.onPageStarted(view, urlString, favicon);
