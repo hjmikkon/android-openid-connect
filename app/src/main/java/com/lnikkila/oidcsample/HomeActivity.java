@@ -67,7 +67,7 @@ public class HomeActivity extends Activity {
                 break;
 
             // There's just one account, let's use that
-            case 1:
+/*            case 1:
                 //new ApiTask().execute(availableAccounts[0]);
                 accountManager.addAccount(accountType, Authenticator.TOKEN_TYPE_ID, null, null,
                         this, new AccountManagerCallback<Bundle>() {
@@ -79,7 +79,7 @@ public class HomeActivity extends Activity {
                                 doLogin(view);
                             }
                         }, null);
-                break;
+                break;*/
 
             // Multiple accounts, let the user pick one
             default:
