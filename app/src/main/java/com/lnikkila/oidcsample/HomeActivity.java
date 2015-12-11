@@ -48,7 +48,7 @@ public class HomeActivity extends Activity {
      */
     public void doLogin(final View view) {
         // Grab all our accounts
-        String accountType = getString(R.string.ACCOUNT_TYPE);
+        final String accountType = getString(R.string.ACCOUNT_TYPE);
         final Account availableAccounts[] = accountManager.getAccountsByType(accountType);
 
         switch (availableAccounts.length) {
@@ -68,16 +68,28 @@ public class HomeActivity extends Activity {
 
             // There's just one account, let's use that
             case 1:
-                new ApiTask().execute(availableAccounts[0]);
+                //new ApiTask().execute(availableAccounts[0]);
+                accountManager.addAccount(accountType, Authenticator.TOKEN_TYPE_ID, null, null,
+                        this, new AccountManagerCallback<Bundle>() {
+                            @Override
+                            public void run(AccountManagerFuture<Bundle> futureManager) {
+                                // Unless the account creation was cancelled, try logging in again
+                                // after the account has been created.
+                                if (futureManager.isCancelled()) return;
+                                doLogin(view);
+                            }
+                        }, null);
                 break;
 
             // Multiple accounts, let the user pick one
             default:
-                String name[] = new String[availableAccounts.length];
+                String name[] = new String[availableAccounts.length + 1];
 
                 for (int i = 0; i < availableAccounts.length; i++) {
                     name[i] = availableAccounts[i].name;
                 }
+                name[availableAccounts.length] = "Add new one";
+                final HomeActivity homeActivity = this;
 
                 new AlertDialog.Builder(this)
                         .setTitle("Choose an account")
@@ -86,7 +98,20 @@ public class HomeActivity extends Activity {
                                 new DialogInterface.OnClickListener() {
                                     @Override
                                     public void onClick(DialogInterface dialog, int selectedAccount) {
-                                        new ApiTask().execute(availableAccounts[selectedAccount]);
+                                        if (selectedAccount < availableAccounts.length) {
+                                            new ApiTask().execute(availableAccounts[selectedAccount]);
+                                        } else {
+                                            accountManager.addAccount(accountType, Authenticator.TOKEN_TYPE_ID, null, null,
+                                                    homeActivity, new AccountManagerCallback<Bundle>() {
+                                                        @Override
+                                                        public void run(AccountManagerFuture<Bundle> futureManager) {
+                                                            // Unless the account creation was cancelled, try logging in again
+                                                            // after the account has been created.
+                                                            if (futureManager.isCancelled()) return;
+                                                            doLogin(view);
+                                                        }
+                                                    }, null);
+                                        }
                                     }
                                 })
                         .create()
