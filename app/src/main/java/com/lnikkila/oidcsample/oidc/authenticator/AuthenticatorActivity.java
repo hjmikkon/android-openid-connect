@@ -13,7 +13,9 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
+import android.webkit.JsResult;
 import android.webkit.SslErrorHandler;
+import android.webkit.WebChromeClient;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
@@ -72,28 +74,50 @@ public class AuthenticatorActivity extends AccountAuthenticatorActivity {
         account = extras.getParcelable(KEY_ACCOUNT_OBJECT);
 
         // Fetch the authentication URL that was given to us by the calling activity
-        String authUrl = extras.getString(KEY_AUTH_URL);
+        final String authUrl = extras.getString(KEY_AUTH_URL);
+
 
         Log.d(TAG, String.format("Initiated activity for getting authorisation with URL '%s'.",
                 authUrl));
 
         // Initialise the WebView
-        WebView webView = (WebView) findViewById(R.id.WebView);
-
+        final WebView webView = (WebView) findViewById(R.id.WebView);
+        //webView.invalidate();
         webView.getSettings().setJavaScriptEnabled(true);
-
+        webView.clearHistory();
+        webView.clearCache(true);
+        webView.setWebChromeClient(new MyWebChromeClient());
         webView.loadUrl(authUrl);
 
         webView.setWebViewClient(new WebViewClient() {
+
+            private boolean initial = true;
 
             @Override
             public void onReceivedSslError(WebView view, SslErrorHandler handler, SslError error) {
                 //TODO: accept all the server certificates
                 handler.proceed();
             }
+
+            @Override
+            public boolean shouldOverrideUrlLoading(WebView view, String url) {
+                if (initial) {
+                    Log.d(TAG, "This is initial");
+                    initial = false;
+                    webView.loadUrl(url);
+                    return true;
+                }
+                Log.d(TAG, "This is not initial, returning false");
+                return false;
+            }
+
             @Override
             public void onPageStarted(WebView view, String urlString, Bitmap favicon) {
                 super.onPageStarted(view, urlString, favicon);
+
+                Log.d(TAG, String.format(
+                        "onPageStarged for urlString '%1$s'",
+                        urlString));
 
                 Uri url = Uri.parse(urlString);
                 Set<String> parameterNames = url.getQueryParameterNames();
@@ -168,9 +192,15 @@ public class AuthenticatorActivity extends AccountAuthenticatorActivity {
                         }
                     }
                 }
+                if (urlString.equals(authUrl)) {
+                    Log.d(TAG, "This is the initial URL");
+                }
+                Log.d(TAG, "No special behaviour, proceeding...");
                 // else : should be an intermediate url, load it and keep going
             }
         });
+
+
     }
 
     private class CreateIdTokenFromFragmentPartTask extends AsyncTask<String, Void, Boolean> {
@@ -418,4 +448,16 @@ public class AuthenticatorActivity extends AccountAuthenticatorActivity {
                 .show();
     }
 
+    /**
+     * Provides a hook for calling "alert" from javascript. Useful for
+     * debugging your javascript.
+     */
+    final class MyWebChromeClient extends WebChromeClient {
+        @Override
+        public boolean onJsAlert(WebView view, String url, String message, JsResult result) {
+            Log.d(TAG, message);
+            result.confirm();
+            return true;
+        }
+    }
 }
