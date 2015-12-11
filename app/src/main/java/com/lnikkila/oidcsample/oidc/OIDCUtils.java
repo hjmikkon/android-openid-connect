@@ -76,11 +76,13 @@ public class OIDCUtils {
 
         // Tell the server to ask for login details again. This ensures that in case of multiple
         // accounts, the user won't accidentally authorise the wrong one.
-        authUrl.set("prompt", "login");
+        // TODO: temp removal
+        //authUrl.set("prompt", "login");
 
         // An optional request parameter that asks the server to provide a touch-enabled interface.
         // Who knows, maybe the server is nice enough to make some changes.
-        authUrl.set("display", "touch");
+        // TODO: temp removal
+        //authUrl.set("display", "touch");
 
         return authUrl.toString();
     }
@@ -193,12 +195,14 @@ public class OIDCUtils {
         } else {
             // Tell the server to ask for login details again. This ensures that in case of multiple
             // accounts, the user won't accidentally authorise the wrong one.
-            request.set("prompt", "login");
+            // TODO: temp removal
+            //request.set("prompt", "login");
         }
 
         // An optional request parameter that asks the server to provide a touch-enabled interface.
         // Who knows, maybe the server is nice enough to make some changes.
-        request.set("display", "touch");
+        // TODO: temp removal
+        //request.set("display", "touch");
 
         return request.build();
     }
