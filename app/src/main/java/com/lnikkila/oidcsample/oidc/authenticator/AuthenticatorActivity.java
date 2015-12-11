@@ -379,9 +379,10 @@ public class AuthenticatorActivity extends AccountAuthenticatorActivity {
             e.printStackTrace();
         }
 
-        if (userInfo.containsKey("preferred_username")) {
-            accountName = (String) userInfo.get("preferred_username");
-        }
+        //if (userInfo.containsKey("preferred_username")) {
+        //    accountName = (String) userInfo.get("preferred_username");
+        //}
+        accountName = accountId;
 
         account = new Account(String.format("%s (%s)", accountName, accountId), accountType);
         accountManager.addAccountExplicitly(account, null, null);
