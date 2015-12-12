@@ -9,14 +9,18 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.text.InputType;
+import android.util.Base64;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ProgressBar;
 
 import com.lnikkila.oidcsample.oidc.authenticator.Authenticator;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.util.Map;
 
 /**
@@ -139,7 +143,8 @@ public class HomeActivity extends Activity {
                         new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog2, int selectedMethod) {
-
+                                createLoginHintDialog(view, homeActivity, accountType, selectedMethod);
+                                /*)
                                 String[] discovery = null;
                                 if (selectedMethod < 4) {
                                     discovery = new String[1];
@@ -157,30 +162,100 @@ public class HomeActivity extends Activity {
                                             discovery[0] = "authn/SocialUserGoogle";
                                             break;
                                     }
+                                    discovery[0] = encodeDiscovery("{ \"authnMethod\"=\"" + discovery[0] + "\", \"username\"=\"test\" }");
                                 }
-                                    AccountManagerFuture<Bundle> future = accountManager.addAccount(accountType, Authenticator.TOKEN_TYPE_ID, discovery, null,
-                                            homeActivity, new AccountManagerCallback<Bundle>() {
-                                                @Override
-                                                public void run(AccountManagerFuture<Bundle> futureManager) {
-                                                    // Unless the account creation was cancelled, try logging in again
-                                                    // after the account has been created.
-                                                    if (futureManager.isCancelled())
-                                                        return;
-                                                    doLogin(view);
-                                                }
-                                            }, null);
+                                AccountManagerFuture<Bundle> future = accountManager.addAccount(accountType, Authenticator.TOKEN_TYPE_ID, discovery, null,
+                                        homeActivity, new AccountManagerCallback<Bundle>() {
+                                            @Override
+                                            public void run(AccountManagerFuture<Bundle> futureManager) {
+                                                // Unless the account creation was cancelled, try logging in again
+                                                // after the account has been created.
+                                                if (futureManager.isCancelled())
+                                                    return;
+                                                doLogin(view);
+                                            }
+                                        }, null);*/
 
-                                }
                             }
-
-                            )
-                .
-
-                            create()
-
-                            .
-
-                            show();
-
                         }
+
+                )
+
+                .create()
+                .show();
+
     }
+
+
+    protected String encodeDiscovery(final String input) {
+        byte[] data = null;
+        try {
+            data = input.getBytes("UTF-8");
+        } catch (UnsupportedEncodingException e1) {
+            return input;
+        }
+        return Base64.encodeToString(data, Base64.NO_WRAP);
+    }
+
+    protected void createLoginHintDialog(final View view, final Activity homeActivity, final String accountType, final int selectedMethod) {
+
+        final String[] discovery;
+        if (selectedMethod < 4) {
+            discovery = new String[1];
+            switch (selectedMethod) {
+                case 0:
+                    discovery[0] = "authn/Password";
+                    break;
+                case 1:
+                    discovery[0] = "authn/SocialUserCgi";
+                    break;
+                case 2:
+                    discovery[0] = "authn/SocialUserGss";
+                    break;
+                case 3:
+                    discovery[0] = "authn/SocialUserGoogle";
+                    break;
+            }
+//            discovery[0] = encodeDiscovery("{ \"authnMethod\"=\"" + discovery[0] + "\", \"username\"=\"test\" }");
+            discovery[0] = "{ \"authnMethod\"=\"" + discovery[0] + "\"";
+        } else {
+            discovery = null;
+        }
+
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(homeActivity)
+                .setTitle("Give login hint");
+        final EditText input = new EditText(homeActivity);
+        input.setInputType(InputType.TYPE_CLASS_TEXT);
+        builder.setView(input);
+        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                String[] fullDiscovery = discovery;
+                if (fullDiscovery != null) {
+                    fullDiscovery[0] = encodeDiscovery(fullDiscovery[0] + "\"username\"=\"" + input.getText().toString() + "\" }");
+                }
+
+                AccountManagerFuture<Bundle> future = accountManager.addAccount(accountType, Authenticator.TOKEN_TYPE_ID, fullDiscovery, null,
+                        homeActivity, new AccountManagerCallback<Bundle>() {
+                            @Override
+                            public void run(AccountManagerFuture<Bundle> futureManager) {
+                                // Unless the account creation was cancelled, try logging in again
+                                // after the account has been created.
+                                if (futureManager.isCancelled())
+                                    return;
+                                doLogin(view);
+                            }
+                        }, null);
+
+            }
+        });
+        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+            }
+        });
+        builder.show();
+
+    }
+}
