@@ -54,34 +54,9 @@ public class HomeActivity extends Activity {
         switch (availableAccounts.length) {
             // No account has been created, let's create one now
             case 0:
-                accountManager.addAccount(accountType, Authenticator.TOKEN_TYPE_ID, null, null,
-                        this, new AccountManagerCallback<Bundle>() {
-                            @Override
-                            public void run(AccountManagerFuture<Bundle> futureManager) {
-                                // Unless the account creation was cancelled, try logging in again
-                                // after the account has been created.
-                                if (futureManager.isCancelled()) return;
-                                doLogin(view);
-                            }
-                        }, null);
+                createDiscoveryDialog(view, this, accountType);
                 break;
 
-            // There's just one account, let's use that
-/*            case 1:
-                //new ApiTask().execute(availableAccounts[0]);
-                accountManager.addAccount(accountType, Authenticator.TOKEN_TYPE_ID, null, null,
-                        this, new AccountManagerCallback<Bundle>() {
-                            @Override
-                            public void run(AccountManagerFuture<Bundle> futureManager) {
-                                // Unless the account creation was cancelled, try logging in again
-                                // after the account has been created.
-                                if (futureManager.isCancelled()) return;
-                                doLogin(view);
-                            }
-                        }, null);
-                break;*/
-
-            // Multiple accounts, let the user pick one
             default:
                 String name[] = new String[availableAccounts.length + 1];
 
@@ -101,16 +76,7 @@ public class HomeActivity extends Activity {
                                         if (selectedAccount < availableAccounts.length) {
                                             new ApiTask().execute(availableAccounts[selectedAccount]);
                                         } else {
-                                            accountManager.addAccount(accountType, Authenticator.TOKEN_TYPE_ID, null, null,
-                                                    homeActivity, new AccountManagerCallback<Bundle>() {
-                                                        @Override
-                                                        public void run(AccountManagerFuture<Bundle> futureManager) {
-                                                            // Unless the account creation was cancelled, try logging in again
-                                                            // after the account has been created.
-                                                            if (futureManager.isCancelled()) return;
-                                                            doLogin(view);
-                                                        }
-                                                    }, null);
+                                            createDiscoveryDialog(view, homeActivity, accountType);
                                         }
                                     }
                                 })
@@ -158,4 +124,63 @@ public class HomeActivity extends Activity {
         }
 
     }
-}
+
+    protected void createDiscoveryDialog(final View view, final Activity homeActivity, final String accountType) {
+        String[] methods = new String[5];
+        methods[0] = "Local Password";
+        methods[1] = "CGI";
+        methods[2] = "GlobalSign";
+        methods[3] = "Google";
+        methods[4] = "Dynamic";
+        new AlertDialog.Builder(homeActivity)
+                .setTitle("Choose method")
+                .setAdapter(new ArrayAdapter<>(homeActivity,
+                                android.R.layout.simple_list_item_1, methods),
+                        new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog2, int selectedMethod) {
+
+                                String[] discovery = null;
+                                if (selectedMethod < 4) {
+                                    discovery = new String[1];
+                                    switch (selectedMethod) {
+                                        case 0:
+                                            discovery[0] = "authn/Password";
+                                            break;
+                                        case 1:
+                                            discovery[0] = "authn/SocialUserCgi";
+                                            break;
+                                        case 2:
+                                            discovery[0] = "authn/SocialUserGss";
+                                            break;
+                                        case 3:
+                                            discovery[0] = "authn/SocialUserGoogle";
+                                            break;
+                                    }
+                                }
+                                    AccountManagerFuture<Bundle> future = accountManager.addAccount(accountType, Authenticator.TOKEN_TYPE_ID, discovery, null,
+                                            homeActivity, new AccountManagerCallback<Bundle>() {
+                                                @Override
+                                                public void run(AccountManagerFuture<Bundle> futureManager) {
+                                                    // Unless the account creation was cancelled, try logging in again
+                                                    // after the account has been created.
+                                                    if (futureManager.isCancelled())
+                                                        return;
+                                                    doLogin(view);
+                                                }
+                                            }, null);
+
+                                }
+                            }
+
+                            )
+                .
+
+                            create()
+
+                            .
+
+                            show();
+
+                        }
+    }

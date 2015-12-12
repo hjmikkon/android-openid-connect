@@ -77,6 +77,7 @@ public class AuthenticatorActivity extends AccountAuthenticatorActivity {
         final String authUrl = extras.getString(KEY_AUTH_URL);
 
 
+
         Log.d(TAG, String.format("Initiated activity for getting authorisation with URL '%s'.",
                 authUrl));
 
@@ -87,7 +88,13 @@ public class AuthenticatorActivity extends AccountAuthenticatorActivity {
         webView.clearHistory();
         webView.clearCache(true);
         webView.setWebChromeClient(new MyWebChromeClient());
-        webView.loadUrl(authUrl);
+        final String discovery = extras.getString("testDiscovery");
+        if (discovery != null) {
+            Log.d(TAG, "Found discovery = " + discovery);
+            webView.loadUrl(authUrl + "&login_hint=" + discovery);
+        } else {
+            webView.loadUrl(authUrl);
+        }
 
         webView.setWebViewClient(new WebViewClient() {
 

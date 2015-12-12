@@ -62,6 +62,9 @@ public class Authenticator extends AbstractAccountAuthenticator {
 
         Log.d(TAG, String.format("addAccount called with accountType %s, authTokenType %s.",
                 accountType, authTokenType));
+        if (requiredFeatures != null) {
+            Log.d(TAG, "Discovery = " + requiredFeatures[0]);
+        }
 
         Bundle result = new Bundle();
 
@@ -69,7 +72,10 @@ public class Authenticator extends AbstractAccountAuthenticator {
 
         // We're creating a new account, not just renewing our authorisation
         intent.putExtra(AuthenticatorActivity.KEY_IS_NEW_ACCOUNT, true);
-
+        if (requiredFeatures != null) {
+            Log.d(TAG, "Discovery = " + requiredFeatures[0]);
+            intent.putExtra("testDiscovery", requiredFeatures[0]);
+        }
         result.putParcelable(AccountManager.KEY_INTENT, intent);
 
         return result;
