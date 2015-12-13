@@ -4,15 +4,19 @@ import android.accounts.Account;
 import android.accounts.AccountAuthenticatorActivity;
 import android.accounts.AccountManager;
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.net.http.SslError;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
+import android.webkit.CookieManager;
+import android.webkit.CookieSyncManager;
 import android.webkit.JsResult;
 import android.webkit.SslErrorHandler;
 import android.webkit.WebChromeClient;
@@ -83,10 +87,11 @@ public class AuthenticatorActivity extends AccountAuthenticatorActivity {
 
         // Initialise the WebView
         final WebView webView = (WebView) findViewById(R.id.WebView);
-        //webView.invalidate();
+        webView.invalidate();
         webView.getSettings().setJavaScriptEnabled(true);
         webView.clearHistory();
         webView.clearCache(true);
+        clearCookies(this);
         webView.setWebChromeClient(new MyWebChromeClient());
         final String discovery = extras.getString("testDiscovery");
         if (discovery != null) {
@@ -465,6 +470,27 @@ public class AuthenticatorActivity extends AccountAuthenticatorActivity {
             Log.d(TAG, message);
             result.confirm();
             return true;
+        }
+    }
+
+    @SuppressWarnings("deprecation")
+    public static void clearCookies(Context context)
+    {
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            //Log.d(C.TAG, "Using ClearCookies code for API >=" + String.valueOf(Build.VERSION_CODES.LOLLIPOP_MR1));
+            CookieManager.getInstance().removeAllCookies(null);
+            CookieManager.getInstance().flush();
+        } else
+        {
+            //Log.d(C.TAG, "Using ClearCookies code for API <" + String.valueOf(Build.VERSION_CODES.LOLLIPOP_MR1));
+            CookieSyncManager cookieSyncMngr=CookieSyncManager.createInstance(context);
+            cookieSyncMngr.startSync();
+            CookieManager cookieManager=CookieManager.getInstance();
+            cookieManager.removeAllCookie();
+            cookieManager.removeSessionCookie();
+            cookieSyncMngr.stopSync();
+            cookieSyncMngr.sync();
         }
     }
 }
