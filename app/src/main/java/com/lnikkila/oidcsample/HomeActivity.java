@@ -220,6 +220,18 @@ public class HomeActivity extends Activity {
             discovery[0] = "{ \"authnMethod\"=\"" + discovery[0] + "\"";
         } else {
             discovery = null;
+            AccountManagerFuture<Bundle> future = accountManager.addAccount(accountType, Authenticator.TOKEN_TYPE_ID, null, null,
+                    homeActivity, new AccountManagerCallback<Bundle>() {
+                        @Override
+                        public void run(AccountManagerFuture<Bundle> futureManager) {
+                            // Unless the account creation was cancelled, try logging in again
+                            // after the account has been created.
+                            if (futureManager.isCancelled())
+                                return;
+                            doLogin(view);
+                        }
+                    }, null);
+            return;
         }
 
 
@@ -233,7 +245,7 @@ public class HomeActivity extends Activity {
             public void onClick(DialogInterface dialog, int which) {
                 String[] fullDiscovery = discovery;
                 if (fullDiscovery != null) {
-                    fullDiscovery[0] = encodeDiscovery(fullDiscovery[0] + "\"username\"=\"" + input.getText().toString() + "\" }");
+                    fullDiscovery[0] = encodeDiscovery(fullDiscovery[0] + ", \"username\"=\"" + input.getText().toString() + "\" }");
                 }
 
                 AccountManagerFuture<Bundle> future = accountManager.addAccount(accountType, Authenticator.TOKEN_TYPE_ID, fullDiscovery, null,

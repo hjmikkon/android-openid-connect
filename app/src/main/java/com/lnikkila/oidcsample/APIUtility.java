@@ -61,9 +61,7 @@ public class APIUtility {
             //        Authenticator.TOKEN_TYPE_ID, null, true, null, null);
             AccountManagerFuture<Bundle> futureManager = accountManager.getAuthToken(account,
                     Authenticator.TOKEN_TYPE_ACCESS, null, true, null, null);
-
             idToken = futureManager.getResult().getString(AccountManager.KEY_AUTHTOKEN);
-            //idToken = futureManager.getResult().getString(AccountManager.KEY_AUTHTOKEN);
         } catch (Exception e) {
             throw new IOException("Could not get ID token from account.", e);
         }
