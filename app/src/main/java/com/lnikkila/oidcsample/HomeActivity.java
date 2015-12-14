@@ -217,7 +217,7 @@ public class HomeActivity extends Activity {
                     break;
             }
 //            discovery[0] = encodeDiscovery("{ \"authnMethod\"=\"" + discovery[0] + "\", \"username\"=\"test\" }");
-            discovery[0] = "{ \"authnMethod\"=\"" + discovery[0] + "\"";
+            discovery[0] = "{ \"authnMethod\":\"" + discovery[0] + "\"";
         } else {
             discovery = null;
             AccountManagerFuture<Bundle> future = accountManager.addAccount(accountType, Authenticator.TOKEN_TYPE_ID, null, null,
@@ -245,7 +245,7 @@ public class HomeActivity extends Activity {
             public void onClick(DialogInterface dialog, int which) {
                 String[] fullDiscovery = discovery;
                 if (fullDiscovery != null) {
-                    fullDiscovery[0] = encodeDiscovery(fullDiscovery[0] + ", \"username\"=\"" + input.getText().toString() + "\" }");
+                    fullDiscovery[0] = encodeDiscovery(fullDiscovery[0] + ", \"username\":\"" + input.getText().toString() + "\" }");
                 }
 
                 AccountManagerFuture<Bundle> future = accountManager.addAccount(accountType, Authenticator.TOKEN_TYPE_ID, fullDiscovery, null,
